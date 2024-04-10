@@ -61,7 +61,7 @@ out:
 
 int dwc3_host_init(struct dwc3 *dwc)
 {
-	struct property_entry	props[5];
+	struct property_entry	props[4];
 	struct platform_device	*xhci;
 	int			ret, irq;
 	int			prop_idx = 0;
