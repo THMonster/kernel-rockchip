@@ -21,7 +21,6 @@
 
 /* Register for RK3568 */
 #define GRF_PCIE30PHY_CON1			0x4
-#define GRF_PCIE30PHY_CON4			0x10
 #define GRF_PCIE30PHY_CON6			0x18
 #define GRF_PCIE30PHY_CON9			0x24
 #define GRF_PCIE30PHY_DA_OCM			(BIT(15) | BIT(31))
@@ -65,10 +64,6 @@ struct rockchip_p3phy_ops {
 	int (*phy_init)(struct rockchip_p3phy_priv *priv);
 };
 
-static u16 phy_fw[] = {
-	#include "p3phy.fw"
-};
-
 static int rockchip_p3phy_set_mode(struct phy *phy, enum phy_mode mode, int submode)
 {
 	struct rockchip_p3phy_priv *priv = phy_get_drvdata(phy);
@@ -93,14 +88,13 @@ static int rockchip_p3phy_rk3568_init(struct rockchip_p3phy_priv *priv)
 {
 	struct phy *phy = priv->phy;
 	bool bifurcation = false;
-	int i;
 	int ret;
 	u32 reg;
 
 	/* Deassert PCIe PMA output clamp mode */
 	regmap_write(priv->phy_grf, GRF_PCIE30PHY_CON9, GRF_PCIE30PHY_DA_OCM);
 
-	for (i = 0; i < priv->num_lanes; i++) {
+	for (int i = 0; i < priv->num_lanes; i++) {
 		dev_info(&phy->dev, "lane number %d, val %d\n", i, priv->lanes[i]);
 		if (priv->lanes[i] > 1)
 			bifurcation = true;
@@ -119,35 +113,16 @@ static int rockchip_p3phy_rk3568_init(struct rockchip_p3phy_priv *priv)
 			     GRF_PCIE30PHY_WR_EN & ~RK3568_BIFURCATION_LANE_0_1);
 	}
 
-	regmap_write(priv->phy_grf, GRF_PCIE30PHY_CON4,
-		     (0x0 << 14) | (0x1 << (14 + 16))); //sdram_ld_done
-	regmap_write(priv->phy_grf, GRF_PCIE30PHY_CON4,
-		     (0x0 << 13) | (0x1 << (13 + 16))); //sdram_bypass
-
 	reset_control_deassert(priv->p30phy);
 
 	ret = regmap_read_poll_timeout(priv->phy_grf,
 				       GRF_PCIE30PHY_STATUS0,
 				       reg, SRAM_INIT_DONE(reg),
 				       0, 500);
-	if (ret) {
+	if (ret)
 		dev_err(&priv->phy->dev, "%s: lock failed 0x%x, check input refclk and power supply\n",
 		       __func__, reg);
-		return ret;
-	}
-
-	regmap_write(priv->phy_grf, GRF_PCIE30PHY_CON9,
-		     (0x3 << 8) | (0x3 << (8 + 16))); //map to access sram
-	for (i = 0; i < 8192; i++)
-		writel(phy_fw[i], priv->mmio + (i<<2));
-
-	regmap_write(priv->phy_grf, GRF_PCIE30PHY_CON9,
-		     (0x0 << 8) | (0x3 << (8 + 16)));
-	regmap_write(priv->phy_grf, GRF_PCIE30PHY_CON4,
-		     (0x1 << 14) | (0x1 << (14 + 16))); //sdram_ld_done
-
-	dev_info(&priv->phy->dev, "p3phy (fw-d54d0eb) initialized\n");
-	return 0;
+	return ret;
 }
 
 static const struct rockchip_p3phy_ops rk3568_ops = {

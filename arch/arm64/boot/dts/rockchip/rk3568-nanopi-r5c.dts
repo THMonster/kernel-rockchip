@@ -3,12 +3,11 @@
  * Copyright (c) 2022 FriendlyElec Computer Tech. Co., Ltd.
  * (http://www.friendlyelec.com)
  *
- * Copyright (c) 2023 Tianling Shen <cnsztl@immortalwrt.org>
+ * Copyright (c) 2023 Tianling Shen <cnsztl@gmail.com>
  */
 
 /dts-v1/;
-#include <dt-bindings/input/input.h>
-#include "rk3568-nanopi-common.dtsi"
+#include "rk3568-nanopi-r5s.dtsi"
 
 / {
 	model = "FriendlyElec NanoPi R5C";
@@ -29,34 +28,32 @@
 
 	gpio-leds {
 		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&lan_led_pin>, <&power_led_pin>, <&wan_led_pin>, <&wlan_led_pin>;
 
-		sys_led: led-sys {
-			gpios = <&gpio3 RK_PA2 GPIO_ACTIVE_HIGH>;
-			label = "red:power";
-			linux,default-trigger = "heartbeat";
-			pinctrl-names = "default";
-			pinctrl-0 = <&sys_led_pin>;
-		};
-
-		wan_led: led-wan {
-			gpios = <&gpio3 RK_PA4 GPIO_ACTIVE_HIGH>;
-			label = "green:wan";
-			pinctrl-names = "default";
-			pinctrl-0 = <&wan_led_pin>;
-		};
-
-		led_lan: led-lan {
+		led-lan {
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_LAN;
 			gpios = <&gpio3 RK_PA3 GPIO_ACTIVE_HIGH>;
-			label = "green:lan";
-			pinctrl-names = "default";
-			pinctrl-0 = <&lan_led_pin>;
 		};
 
-		wlan_led: led-wlan {
+		power_led: led-power {
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_POWER;
+			linux,default-trigger = "heartbeat";
+			gpios = <&gpio3 RK_PA2 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-wan {
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_WAN;
+			gpios = <&gpio3 RK_PA4 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-wlan {
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_WLAN;
 			gpios = <&gpio3 RK_PA5 GPIO_ACTIVE_HIGH>;
-			label = "green:wlan";
-			pinctrl-names = "default";
-			pinctrl-0 = <&wlan_led_pin>;
 		};
 	};
 };
@@ -84,16 +81,16 @@
 
 &pinctrl {
 	gpio-leds {
-		sys_led_pin: sys-led-pin {
+		lan_led_pin: lan-led-pin {
+			rockchip,pins = <3 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		power_led_pin: power-led-pin {
 			rockchip,pins = <3 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
 		wan_led_pin: wan-led-pin {
 			rockchip,pins = <3 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-
-		lan_led_pin: lan-led-pin {
-			rockchip,pins = <3 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
 		wlan_led_pin: wlan-led-pin {
@@ -109,7 +106,7 @@
 
 	rockchip-key {
 		reset_button_pin: reset-button-pin {
-			rockchip,pins = <4 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
+			rockchip,pins = <0 RK_PB7 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };

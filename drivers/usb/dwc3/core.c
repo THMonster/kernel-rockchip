@@ -1574,8 +1574,6 @@ static void dwc3_get_properties(struct dwc3 *dwc)
 				"snps,dis-del-phy-power-chg-quirk");
 	dwc->dis_tx_ipgap_linecheck_quirk = device_property_read_bool(dev,
 				"snps,dis-tx-ipgap-linecheck-quirk");
-	dwc->xhci_trb_ent_quirk = device_property_read_bool(dev,
-				"snps,xhci-trb-ent-quirk");
 	dwc->resume_hs_terminations = device_property_read_bool(dev,
 				"snps,resume-hs-terminations");
 	dwc->ulpi_ext_vbus_drv = device_property_read_bool(dev,
